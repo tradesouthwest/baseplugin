@@ -50,6 +50,22 @@ function crelate_shortcode_register_admin_options()
     );
         // c1.) settings 
     add_settings_field(
+        'crelate_shortcode_result',
+        esc_attr__('Shortcode', 'unitizr'),
+        'crelate_shortcode_result_cb',
+        'crelate_shortcode_options',
+        'crelate_shortcode_settings_section',
+        array( 
+            'type'         => 'text',
+            'option_group' => 'crelate_shortcode_options', 
+            'name'         => 'crelate_shortcode_result',
+            'value'        => ( empty( get_option('crelate_shortcode_options')['crelate_shortcode_result'] )) 
+                              ? false : get_option('crelate_shortcode_options')['crelate_shortcode_result'],
+            'description'  => esc_html__( 'Shortcode to Use', 'crelate-short'),
+            'tip'          => esc_html__( 'Add this to the page to get results', 'crelate-short' )
+        )
+    );
+    add_settings_field(
         'crelate_shortcode_url',
         esc_attr__('iFrame URL', 'unitizr'),
         'crelate_shortcode_url_cb',
@@ -59,11 +75,32 @@ function crelate_shortcode_register_admin_options()
             'type'         => 'text',
             'option_group' => 'crelate_shortcode_options', 
             'name'         => 'crelate_shortcode_url',
-            'value'        => 
-            esc_attr( get_option( 'crelate_shortcode_options' )['crelate_shortcode_url'] ),
+            'value'        => ( empty( get_option('crelate_shortcode_options')['crelate_shortcode_url'] )) 
+                              ? false : get_option('crelate_shortcode_options')['crelate_shortcode_url'],
             'description'  => esc_html__( 'The url of your Crelate iframe address', 'crelate-short'),
             'tip'          => esc_html__( 'JUST the part after src="....', 'crelate-short' )
         )
+    );
+}
+
+
+/** 
+ * render for '0' field
+ * @since 1.0.0
+ */
+function crelate_shortcode_result_cb($args)
+{  
+    printf(
+    '<fieldset><b class="grctip" data-title="%5$s">?</b><sup></sup>
+    <p><span class="vmarg">%4$s </span></p>
+    <input id="%1$s" class="text-field" name="%2$s[%1$s]" type="%6$s" value="%3$s"/>
+    </fieldset>',
+        $args['name'],
+        $args['option_group'],
+        $args['value'],
+        $args['description'],
+        $args['tip'],
+        $args['type']
     );
 }
 
@@ -79,7 +116,7 @@ function crelate_shortcode_url_cb($args)
     <input id="%1$s" class="text-field" name="%2$s[%1$s]" type="%6$s" value="%3$s"/>
     </fieldset>',
         $args['name'],
-        $args['option_name'],
+        $args['option_group'],
         $args['value'],
         $args['description'],
         $args['tip'],
