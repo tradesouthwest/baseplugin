@@ -1,65 +1,37 @@
 <?php
 
-function crelate_shortcode_getOptions($option, $defaults=array())
+function crelate_shortcode_add_shortcode_cb( $atts ) 
 {
-    $options = get_option($option, array());
-    if(!isset($options) || !is_array($options) || empty($options))
-        return $defaults;
-    return array_merge($defaults, $options);
-}
+	$html = '';
+    $src = get_option('crelate_shortcode_options')['crelate_shortcode_url'];
 
-function crelate_shortcode_add_shortcode_cb( $atts ) {
-
-    $src = crelate_shortcode_getOptions(('crelate_shortcode_options' )['crelate_shortcode_url']);
-
-	$defaults = array(
-		'src' => $src,
-		'width' => '100%',
-		'height' => '',
-		'scrolling' => 'no',
-		'class' => 'iframe-class',
+	$att = shortcode_atts( array(
+		'src'         => $src,
+		'width'       => '100%',
+		'height'      => '680px',
+		'scrolling'   => 'no',
+		'class'       => 'iframe-class',
 		'frameborder' => '0'
-	);
+		), 
+		$atts 
+		);
 
-	foreach ( $defaults as $default => $value ) { // add defaults
-		if ( ! @array_key_exists( $default, $atts ) ) { // mute warning with "@" when no params at all
-			$atts[$default] = $value;
-		}
-	}
+	$html .= '<div id="crelate-iframe" style="text-align: center; 
+			-webkit-overflow-scrolling:touch; overflow: auto;">';
+	$html .= '<iframe src="'. $att['src'] .'" 
+			class="'. $att['class'] .'" 
+			width="'. $att['width'] .'" 
+			height="'. $att['height'] .'" 
+			scrolling="'. $att['scrolling'] .'" 
+			frameborder="'. $att['frameborder'] .'"></iframe>';
 
-	$html = '<div id="crelate-iframe" style="text-align: center; -webkit-overflow-scrolling:touch; overflow: auto;">';
-	$html .= '<iframe';
-	foreach( $atts as $attr => $value ) {
-		if ( strtolower($attr) == 'src' ) { // sanitize url
-			$value = esc_url( $value );
-		}
-		if ( strtolower($attr) != 'same_height_as' AND strtolower($attr) != 'onload'
-			AND strtolower($attr) != 'onpageshow' AND strtolower($attr) != 'onclick') { // remove some attributes
-			if ( $value != '' ) { // adding all attributes
-				$html .= ' ' . esc_attr( $attr ) . '="' . esc_attr( $value ) . '"';
-			} else { // adding empty attributes
-				$html .= ' ' . esc_attr( $attr );
-			}
-		}
-	}
-	$html .= '></iframe>'."\n";
 
-	if ( isset( $atts["same_height_as"] ) ) {
-		$html .= '
-			<script>
-			document.addEventListener("DOMContentLoaded", function(){
-				var target_element, iframe_element;
-				iframe_element = document.querySelector("iframe.' . esc_attr( $atts["class"] ) . '");
-				target_element = document.querySelector("' . esc_attr( $atts["same_height_as"] ) . '");
-				iframe_element.style.height = target_element.offsetHeight + "px";
-			});
-			</script>
-		';
-	}
+	$html .= '</div>';
+	
 
 	return $html;
 }
-add_shortcode( 'iframe', 'crelate_shortcode_add_shortcode_cb' );
+add_shortcode( 'crelate_iframe', 'crelate_shortcode_add_shortcode_cb' );
 
 
 function crelate_shortcode_row_meta_cb( $links, $file ) {
@@ -72,4 +44,3 @@ function crelate_shortcode_row_meta_cb( $links, $file ) {
 	return (array) $links;
 }
 add_filter( 'plugin_row_meta', 'crelate_shortcode_row_meta_cb', 10, 2 );
-
